@@ -33,6 +33,9 @@ contract Doc0 is Ownable {
 
 	// TODO - add a getPayment function that is a public view.
 	// function...
+	function getPayment () public onlyOwner {
+		return minPayment;
+	}
 
 	function setNoterizer ( address aNotery ) public onlyOwner {
 		isNotery[aNotery] = true;
@@ -45,6 +48,9 @@ contract Doc0 is Ownable {
 	// TODO - add a isValidNoterizer function as a public view that returns true if the passed address is a valid
 	// noterizer.
 	// function...
+	function isValidNoterizer ( address aNotery ) public onlyOwner {
+		return isNotery[aNotery];
+	}
 
 	function newDocument ( string memory name, bytes32 infoHash, string memory info ) public payable returns(bool) {
 		require(!infoSet[infoHash], "already set, already has owner.");		// Validate that this is a new document
@@ -53,10 +59,15 @@ contract Doc0 is Ownable {
 		infoSet[infoHash] = true;	// This will be used in noterizeDocument 
 
 		// TODO: declare an in-memory docData structure.
+		docData data = docData ({name: name, owner:msg.sender, infoHash: infoHash, userData:info});
 		// TODO: set the values in the structure
 		// TODO: append the structure to perUserDocs for this msg.sender
+		perUserDocs[msg.sender] = data;
 		// TODO: create in docIndex a way to get to this msg.sender so that the document can be found by docHash
+		docIndex[infoHash] = msg.sender;
 		// TODO: emit DocumentSet and DocumentOwner events
+		emit DocumentSet(name, infoHash, info);
+		emit DocumentOwner(msg.sender, name, infoHash, info);
 		
 		return true;
 	}
